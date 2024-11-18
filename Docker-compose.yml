@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  orderservice:
+    build:
+      context: .
+      dockerfile: ./OrderService/Dockerfile
+    ports:
+      - "5001:80"  # Expose port 5001 for OrderService
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - app-network
+    depends_on:
+      - stockservice
+      - notificationservice
+
+  stockservice:
+    build:
+      context: .
+      dockerfile: ./StockService/Dockerfile
+    ports:
+      - "5002:80"  # Expose port 5002 for StockService
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - app-network
+    depends_on:
+      - notificationservice
+
+  notificationservice:
+    build:
+      context: .
+      dockerfile: ./NotificationService/Dockerfile
+    ports:
+      - "5003:80"  # Expose port 5003 for NotificationService
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - app-network
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: ./ApiGateway/Dockerfile
+    ports:
+      - "5000:80"  # Expose port 5000 for ApiGateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - app-network
+    depends_on:
+      - orderservice
+      - stockservice
+      - notificationservice
+
+networks:
+  app-network:
+    driver: bridge
